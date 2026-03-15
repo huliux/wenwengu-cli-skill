@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wenwengu CLI"
+  short_description: "Translate natural-language valuation or CLI setup requests into wenwengu workflows."
+  default_prompt: "Use $wenwengu-cli to translate natural-language valuation, diagnostics, scenario comparison, binary install, screening, or screener data requests into wenwengu CLI workflows."

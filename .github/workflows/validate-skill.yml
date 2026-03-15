@@ -1,0 +1,44 @@
+name: Validate Skill Bundle
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-structure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate skill bundle structure
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path.cwd()
+          required_files = [
+              root / "SKILL.md",
+              root / "README.md",
+              root / "agents" / "openai.yaml",
+              root / "scripts" / "run_valuation.py",
+              root / "scripts" / "install_binary.py",
+              root / "references" / "binary_install.md",
+          ]
+
+          missing = [str(path) for path in required_files if not path.exists()]
+          if missing:
+              raise SystemExit("Missing required publishable skill files:\n" + "\n".join(missing))
+
+          frontmatter = (root / "SKILL.md").read_text(encoding="utf-8")
+          if 'name: wenwengu-cli' not in frontmatter:
+              raise SystemExit("SKILL.md frontmatter does not declare the expected skill name.")
+          if "huliux/wenwengu-cli-skill" not in frontmatter:
+              raise SystemExit("SKILL.md is not pointing at the public release repository.")
+          PY
