@@ -47,9 +47,33 @@ Expected asset names:
 
 ## Notes
 
-- Runtime configuration such as `TUSHARE_TOKEN` is still provided at runtime via environment variables or `.env`.
+- Runtime configuration such as `TUSHARE_TOKEN` is provided at runtime.
 - The public CLI is valuation-only and uses Tushare as its data source.
 - The packaged valuation engine is not embedded in the skill files themselves; it is distributed via GitHub Releases.
+
+## Tushare Token Setup (OpenClaw)
+
+Recommended setup:
+
+```bash
+openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
+openclaw gateway restart
+```
+
+Alternative explicit env binding:
+
+```bash
+openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
+openclaw gateway restart
+```
+
+Fallback for shell/service environments:
+
+```bash
+echo 'TUSHARE_TOKEN=your_tushare_token' >> ~/.openclaw/.env
+openclaw gateway restart
+```
 
 ## Templates
 

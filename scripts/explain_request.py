@@ -40,8 +40,7 @@ def explain_request_payload(payload: dict[str, Any]) -> str:
         f"- 标的: {ts_code}",
         f"- 估值日: {payload.get('valuation_date') or '最新可用日期'}",
         f"- 预测期: {payload.get('forecast_years', 'N/A')} 年",
-        "- 基期: "
-        f"{'LTM' if payload.get('ltm_baseline_enabled') else '最新年报'}",
+        f"- 基期: {'LTM' if payload.get('ltm_baseline_enabled') else '最新年报'}",
         f"- 终值法: {payload.get('terminal_value_method', 'N/A')}",
     ]
 
@@ -56,9 +55,6 @@ def explain_request_payload(payload: dict[str, Any]) -> str:
 
     wacc_overrides = _format_wacc_overrides(payload)
     lines.append(f"- WACC 覆盖: {wacc_overrides}")
-    lines.append(
-        f"- LLM 总结: {'开启' if payload.get('request_llm_summary') else '关闭'}"
-    )
 
     if sensitivity:
         lines.append(

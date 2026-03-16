@@ -45,14 +45,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="List supported valuation and sensitivity presets, then exit.",
     )
     parser.add_argument("--ts-code", help="Stock code, for example 600519.SH.")
-    parser.add_argument("--label", help="Optional scenario label for downstream workflows.")
+    parser.add_argument(
+        "--label", help="Optional scenario label for downstream workflows."
+    )
     parser.add_argument("--valuation-date", help="Valuation date in YYYY-MM-DD.")
     parser.add_argument("--forecast-years", type=int, help="Forecast years.")
-    parser.add_argument(
-        "--llm-summary",
-        action="store_true",
-        help="Set request_llm_summary=true.",
-    )
     parser.add_argument(
         "--ltm-baseline",
         action="store_true",
@@ -77,7 +74,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Market risk premium override.",
     )
     parser.add_argument("--cost-of-debt", type=float, help="Cost of debt override.")
-    parser.add_argument("--target-debt-ratio", type=float, help="Target debt ratio override.")
+    parser.add_argument(
+        "--target-debt-ratio", type=float, help="Target debt ratio override."
+    )
     parser.add_argument(
         "--wacc-weight-mode",
         choices=["target", "market"],
@@ -139,7 +138,9 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_payload(args)
 
     destination_count = sum(
-        1 for enabled in [bool(args.output_file), args.temp_file, args.stdout] if enabled
+        1
+        for enabled in [bool(args.output_file), args.temp_file, args.stdout]
+        if enabled
     )
     if destination_count > 1:
         parser.error("Choose only one of --output-file, --temp-file, or --stdout.")
@@ -170,7 +171,9 @@ def build_payload(args) -> dict:
         payload.update(_load_request_file(args.base_request))
 
     if args.preset:
-        payload = _deep_merge_dicts(payload, resolve_valuation_preset(args.preset).payload)
+        payload = _deep_merge_dicts(
+            payload, resolve_valuation_preset(args.preset).payload
+        )
 
     if args.ts_code:
         payload["ts_code"] = args.ts_code
@@ -197,8 +200,6 @@ def build_payload(args) -> dict:
         if value is not None:
             payload[key] = value
 
-    if args.llm_summary:
-        payload["request_llm_summary"] = True
     if args.ltm_baseline:
         payload["ltm_baseline_enabled"] = True
     if args.mid_year_convention:

@@ -132,7 +132,9 @@ def resolve_binary_candidates(
     env_bin = os.getenv("WENWENGU_CLI_BIN")
     if env_bin:
         candidates.append(
-            BinaryCandidate("env:WENWENGU_CLI_BIN", Path(env_bin).expanduser().resolve())
+            BinaryCandidate(
+                "env:WENWENGU_CLI_BIN", Path(env_bin).expanduser().resolve()
+            )
         )
 
     asset_spec = resolve_asset_spec()
@@ -213,7 +215,9 @@ def install_binary(
             )
 
         if os.name != "nt":
-            binary_path.chmod(binary_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            binary_path.chmod(
+                binary_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+            )
 
         if force and target_dir.exists():
             shutil.rmtree(target_dir)
@@ -257,12 +261,19 @@ def install_binary(
 
 
 def download_archive(url: str, destination: Path) -> None:
-    request = urllib.request.Request(url, headers={"User-Agent": "wenwengu-cli-skill-installer"})
+    request = urllib.request.Request(
+        url, headers={"User-Agent": "wenwengu-cli-skill-installer"}
+    )
     try:
-        with urllib.request.urlopen(request) as response, destination.open("wb") as handle:
+        with (
+            urllib.request.urlopen(request) as response,
+            destination.open("wb") as handle,
+        ):
             shutil.copyfileobj(response, handle)
     except Exception as exc:
-        raise SystemExit(f"Failed to download engine package from {url}: {exc}") from exc
+        raise SystemExit(
+            f"Failed to download engine package from {url}: {exc}"
+        ) from exc
 
 
 def download_release_archive(
@@ -282,7 +293,9 @@ def download_release_archive(
     ]
     if version == "latest":
         candidate_urls.append(
-            build_release_url(repo_slug=repo_slug, version="edge", asset_name=asset_name)
+            build_release_url(
+                repo_slug=repo_slug, version="edge", asset_name=asset_name
+            )
         )
 
     last_error: SystemExit | None = None
@@ -295,7 +308,9 @@ def download_release_archive(
 
     if last_error is not None:
         raise last_error
-    raise SystemExit("Failed to resolve a release download URL for the valuation engine.")
+    raise SystemExit(
+        "Failed to resolve a release download URL for the valuation engine."
+    )
 
 
 def extract_archive(*, archive_path: Path, archive_type: str, target_dir: Path) -> None:
@@ -319,7 +334,9 @@ def extract_archive(*, archive_path: Path, archive_type: str, target_dir: Path) 
                     member_path.mkdir(parents=True, exist_ok=True)
                     continue
                 if member.issym() or member.islnk():
-                    raise SystemExit("Refusing to extract archive with symlink entries.")
+                    raise SystemExit(
+                        "Refusing to extract archive with symlink entries."
+                    )
                 member_path.parent.mkdir(parents=True, exist_ok=True)
                 extracted = archive.extractfile(member)
                 if extracted is None:

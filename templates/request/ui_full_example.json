@@ -1,5 +1,5 @@
 {
-  "ts_code": "600519.SH",
+  "ts_code": "300502.SZ",
   "valuation_date": "2026-03-16",
   "forecast_years": 5,
   "ltm_baseline_enabled": false,
@@ -26,7 +26,6 @@
   "use_gdp_cap": true,
   "gdp_nominal_cap": 0.05,
   "mid_year_convention": false,
-  "request_llm_summary": false,
   "sensitivity_analysis": {
     "row_axis": {
       "parameter_name": "wacc",

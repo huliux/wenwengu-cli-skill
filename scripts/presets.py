@@ -86,7 +86,12 @@ SENSITIVITY_PRESETS = {
     "wacc-exit-standard": Preset(
         name="wacc-exit-standard",
         description="Standard 5x5 grid with WACC on rows and exit multiple on columns.",
-        aliases=("wacc-exit-standard", "exit-standard", "标准退出敏感性", "标准wacc退出"),
+        aliases=(
+            "wacc-exit-standard",
+            "exit-standard",
+            "标准退出敏感性",
+            "标准wacc退出",
+        ),
         payload={
             "row_axis": {
                 "parameter_name": "wacc",
@@ -101,7 +106,12 @@ SENSITIVITY_PRESETS = {
     "wacc-pgr-standard": Preset(
         name="wacc-pgr-standard",
         description="Standard 5x5 grid with WACC on rows and perpetual growth on columns.",
-        aliases=("wacc-pgr-standard", "pgr-standard", "标准永续增长敏感性", "标准wacc永续增长"),
+        aliases=(
+            "wacc-pgr-standard",
+            "pgr-standard",
+            "标准永续增长敏感性",
+            "标准wacc永续增长",
+        ),
         payload={
             "row_axis": {
                 "parameter_name": "wacc",

@@ -55,7 +55,10 @@ def summarize_valuation(payload: dict[str, Any]) -> str:
 
 def summarize_doctor(payload: dict[str, Any]) -> str:
     failed_checks = [
-        check for check in payload.get("checks", []) if check.get("status") != "ok"
+        check for check in payload.get("checks", []) if check.get("status") == "fail"
+    ]
+    warn_checks = [
+        check for check in payload.get("checks", []) if check.get("status") == "warn"
     ]
     conclusion = (
         "当前环境可以继续执行本地 CLI 流程。"
@@ -69,6 +72,12 @@ def summarize_doctor(payload: dict[str, Any]) -> str:
         f"- 数据源: {payload.get('data_source', 'unknown')}",
     ]
 
+    if warn_checks:
+        warn_text = "；".join(
+            f"{check.get('name')}: {check.get('message')}" for check in warn_checks
+        )
+        lines.append(f"- 提示项: {warn_text}")
+
     if not failed_checks:
         lines.append("- 失败项: 无")
         return "\n".join(lines)
@@ -77,6 +86,16 @@ def summarize_doctor(payload: dict[str, Any]) -> str:
         f"{check.get('name')}: {check.get('message')}" for check in failed_checks
     )
     lines.append(f"- 失败项: {failed_text}")
+    has_tushare_fail = any(check.get("name") == "tushare" for check in failed_checks)
+    if has_tushare_fail:
+        lines.extend(
+            [
+                "- 建议修复: 在 OpenClaw 配置 TUSHARE token 后重试。",
+                '- 命令: openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"',
+                '- 命令: openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"',
+                "- 命令: openclaw gateway restart",
+            ]
+        )
     return "\n".join(lines)
 
 

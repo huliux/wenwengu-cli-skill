@@ -7,6 +7,7 @@ metadata:
       {
         "always": true,
         "skillKey": "wenwengu-cli",
+        "primaryEnv": "TUSHARE_TOKEN",
         "emoji": "📈",
         "homepage": "https://github.com/huliux/wenwengu-cli-skill",
       },
@@ -170,7 +171,6 @@ The user-facing sections you care about map like this:
 - This public skill is Tushare-only.
 - Do not assume a local project checkout is required.
 - Do not route the user into screening or data-refresh commands.
-- Do not require LLM configuration unless the user explicitly asks for LLM output.
 - Prefer saving results to external JSON files with `--save-json` instead of inventing local cache flows.
 
 ## Common Commands
@@ -181,7 +181,6 @@ Use to verify:
 
 - `TUSHARE_TOKEN`
 - Tushare connectivity
-- optional LLM key presence when relevant
 
 Examples:
 
@@ -189,6 +188,21 @@ Examples:
 python scripts/doctor.py
 python scripts/doctor.py --summarize
 python scripts/run_cli.py doctor --output table
+```
+
+OpenClaw token setup (recommended):
+
+```bash
+openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
+openclaw gateway restart
+```
+
+Alternative explicit env binding:
+
+```bash
+openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
+openclaw gateway restart
 ```
 
 ### `install_engine`

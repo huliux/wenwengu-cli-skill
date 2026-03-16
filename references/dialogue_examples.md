@@ -23,7 +23,6 @@ Route:
 Report focus:
 - missing `TUSHARE_TOKEN`
 - Tushare connectivity
-- LLM key only if the user explicitly asked for LLM output
 
 ### Skill install or repair
 

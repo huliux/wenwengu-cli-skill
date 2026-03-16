@@ -25,7 +25,6 @@
   "use_gdp_cap": true,
   "gdp_nominal_cap": 0.05,
   "mid_year_convention": false,
-  "request_llm_summary": false,
   "sensitivity_analysis": {
     "row_axis": {
       "parameter_name": "wacc",

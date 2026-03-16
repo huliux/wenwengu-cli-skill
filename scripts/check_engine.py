@@ -69,7 +69,9 @@ def main(argv: list[str] | None = None) -> int:
     elif explicit_path is not None:
         payload["source"] = "explicit"
         payload["path"] = str(explicit_path)
-        payload["stderr"] = f"Configured wenwengu valuation engine was not found: {explicit_path}"
+        payload["stderr"] = (
+            f"Configured wenwengu valuation engine was not found: {explicit_path}"
+        )
 
     if args.output == "json":
         print(json.dumps(payload, indent=2, ensure_ascii=False))

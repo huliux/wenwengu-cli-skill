@@ -80,12 +80,9 @@ def build_comparison_lines(
         "- WACC: "
         f"{_format_percent(left_core['wacc'])} -> "
         f"{_format_percent(right_core['wacc'])}",
-        "- 终值法: "
-        f"{left_core['terminal_method']} -> {right_core['terminal_method']}",
-        "- 预测期: "
-        f"{left_core['forecast_years']} -> {right_core['forecast_years']} 年",
-        "- 数据警告数: "
-        f"{left_core['warning_count']} -> {right_core['warning_count']}",
+        f"- 终值法: {left_core['terminal_method']} -> {right_core['terminal_method']}",
+        f"- 预测期: {left_core['forecast_years']} -> {right_core['forecast_years']} 年",
+        f"- 数据警告数: {left_core['warning_count']} -> {right_core['warning_count']}",
     ]
 
     if left_core["latest_price"] == right_core["latest_price"]:

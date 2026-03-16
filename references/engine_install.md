@@ -20,6 +20,30 @@ python scripts/upgrade_engine.py
 
 Use the same helpers when the user wants a fully manual path outside OpenClaw.
 
+## Tushare token setup in OpenClaw
+
+Recommended:
+
+```bash
+openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
+openclaw gateway restart
+```
+
+Alternative explicit env binding:
+
+```bash
+openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
+openclaw gateway restart
+```
+
+Fallback:
+
+```bash
+echo 'TUSHARE_TOKEN=your_tushare_token' >> ~/.openclaw/.env
+openclaw gateway restart
+```
+
 ## Default install layouts
 
 - OpenClaw runtime layout

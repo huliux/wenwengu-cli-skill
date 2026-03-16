@@ -37,8 +37,9 @@ def main(argv: list[str] | None = None) -> int:
         "--sensitivity-preset",
         help="Optional sensitivity preset applied to each scenario.",
     )
-    parser.add_argument("--llm-summary", action="store_true", help="Request LLM summary.")
-    parser.add_argument("--ltm-baseline", action="store_true", help="Enable LTM baseline.")
+    parser.add_argument(
+        "--ltm-baseline", action="store_true", help="Enable LTM baseline."
+    )
     parser.add_argument(
         "--set",
         dest="overrides",
@@ -55,7 +56,9 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
-    scenario_names = [item.strip() for item in args.scenarios.split(",") if item.strip()]
+    scenario_names = [
+        item.strip() for item in args.scenarios.split(",") if item.strip()
+    ]
     if not scenario_names:
         parser.error("Provide at least one scenario preset.")
 
@@ -124,7 +127,9 @@ def summarize_scenario_matrix(results: list[dict]) -> str:
     ]
 
     for item in results:
-        dcf = ((item["result"].get("valuation_results") or {}).get("dcf_forecast_details") or {})
+        dcf = (item["result"].get("valuation_results") or {}).get(
+            "dcf_forecast_details"
+        ) or {}
         lines.append(
             "  - "
             f"{item['scenario']}: 每股价值 {_format_number(dcf.get('value_per_share'))} | "
@@ -136,7 +141,9 @@ def summarize_scenario_matrix(results: list[dict]) -> str:
     if len(results) > 1:
         lines.append("- 与首个情景对比:")
         for item in results[1:]:
-            comparison_lines = build_comparison_lines(baseline["result"], item["result"])
+            comparison_lines = build_comparison_lines(
+                baseline["result"], item["result"]
+            )
             lines.append(f"  - {item['scenario']} vs {baseline['scenario']}:")
             for comparison_line in comparison_lines[1:]:
                 lines.append(f"    {comparison_line}")
@@ -186,8 +193,6 @@ def _make_request_payload(args, scenario_name: str) -> dict:
         command.extend(["--forecast-years", str(args.forecast_years)])
     if args.sensitivity_preset:
         command.extend(["--sensitivity-preset", args.sensitivity_preset])
-    if args.llm_summary:
-        command.append("--llm-summary")
     if args.ltm_baseline:
         command.append("--ltm-baseline")
     command.extend(["--label", scenario_name])

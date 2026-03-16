@@ -11,7 +11,11 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from binary_manager import detect_preferred_layout, find_installed_binary, install_binary
+from binary_manager import (
+    detect_preferred_layout,
+    find_installed_binary,
+    install_binary,
+)
 from result_summary import summarize_payload
 
 
@@ -35,7 +39,9 @@ def ensure_json_output(cli_args: Sequence[str]) -> list[str]:
     if output_mode is None:
         return [*args, "--output", "json"]
     if output_mode != "json":
-        raise SystemExit("--summarize requires JSON output. Omit --output or use --output json.")
+        raise SystemExit(
+            "--summarize requires JSON output. Omit --output or use --output json."
+        )
     return args
 
 
@@ -54,8 +60,7 @@ def resolve_binary(explicit_bin: str | None) -> Path | None:
         explicit_path = Path(explicit_bin).expanduser().resolve()
         if not explicit_path.exists():
             raise SystemExit(
-                "Configured wenwengu valuation engine was not found: "
-                f"{explicit_path}"
+                f"Configured wenwengu valuation engine was not found: {explicit_path}"
             )
         return explicit_path
 
@@ -64,8 +69,7 @@ def resolve_binary(explicit_bin: str | None) -> Path | None:
         env_path = Path(env_bin).expanduser().resolve()
         if not env_path.exists():
             raise SystemExit(
-                "Configured wenwengu valuation engine was not found: "
-                f"{env_path}"
+                f"Configured wenwengu valuation engine was not found: {env_path}"
             )
         return env_path
 
@@ -226,9 +230,7 @@ def build_wenwengu_command(
 
 def auto_install_engine() -> Path:
     layout = detect_preferred_layout()
-    sys.stderr.write(
-        "未发现可用的 wenwengu 估值引擎，正在自动安装后继续执行。\n"
-    )
+    sys.stderr.write("未发现可用的 wenwengu 估值引擎，正在自动安装后继续执行。\n")
     try:
         result = install_binary(layout=layout, force=False)
     except SystemExit as exc:

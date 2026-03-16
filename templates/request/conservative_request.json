@@ -24,6 +24,5 @@
   "perpetual_growth_rate": 0.02,
   "use_gdp_cap": true,
   "gdp_nominal_cap": 0.05,
-  "mid_year_convention": false,
-  "request_llm_summary": false
+  "mid_year_convention": false
 }
