@@ -20,8 +20,7 @@ def main(argv: list[str] | None = None) -> int:
         prog="run_scenarios.py",
         description="Run multiple valuation scenario presets and summarize the result.",
     )
-    parser.add_argument("--repo", help="Explicit repository root.")
-    parser.add_argument("--bin", help="Explicit wenwengu-cli binary path.")
+    parser.add_argument("--bin", help="Explicit valuation engine path.")
     parser.add_argument("--ts-code", help="Stock code, for example 600519.SH.")
     parser.add_argument(
         "--base-request",
@@ -65,18 +64,19 @@ def main(argv: list[str] | None = None) -> int:
         preset = resolve_valuation_preset(scenario_name)
         request_payload = _make_request_payload(args, preset.name)
         request_file = create_temp_request_file(request_payload)
-
-        completed = capture_wenwengu_cli(
-            ["valuate", "--request-file", str(request_file), "--output", "json"],
-            explicit_repo=args.repo,
-            explicit_bin=args.bin,
-        )
-        if completed.returncode != 0:
-            if completed.stderr:
-                sys.stderr.write(completed.stderr)
-            if completed.stdout:
-                sys.stdout.write(completed.stdout)
-            return completed.returncode
+        try:
+            completed = capture_wenwengu_cli(
+                ["valuate", "--request-file", str(request_file), "--output", "json"],
+                explicit_bin=args.bin,
+            )
+            if completed.returncode != 0:
+                if completed.stderr:
+                    sys.stderr.write(completed.stderr)
+                if completed.stdout:
+                    sys.stdout.write(completed.stdout)
+                return completed.returncode
+        finally:
+            request_file.unlink(missing_ok=True)
 
         results.append(
             {
@@ -172,13 +172,10 @@ def _make_request_payload(args, scenario_name: str) -> dict:
         sys.executable,
         str(SCRIPT_DIR / "make_request.py"),
         "--stdout",
-        "--no-validate",
         "--preset",
         scenario_name,
     ]
 
-    if args.repo:
-        command.extend(["--repo", args.repo])
     if args.base_request:
         command.extend(["--base-request", args.base_request])
     if args.ts_code:

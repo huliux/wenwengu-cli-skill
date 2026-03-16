@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from binary_manager import find_installed_binary
+from binary_manager import detect_preferred_layout, find_installed_binary, install_binary
 from result_summary import summarize_payload
 
 
@@ -49,42 +49,28 @@ def get_output_mode(cli_args: Sequence[str]) -> str | None:
     return None
 
 
-def resolve_repo_root(explicit_repo: str | None, *, required: bool = True) -> Path | None:
-    repo_hint = explicit_repo or os.getenv("WENWENGU_CLI_REPO")
-    if repo_hint:
-        repo_root = Path(repo_hint).expanduser().resolve()
-        assert_wenwengu_repo(repo_root)
-        return repo_root
-
-    current = Path.cwd().resolve()
-    for candidate in [current, *current.parents]:
-        pyproject = candidate / "pyproject.toml"
-        if not pyproject.exists():
-            continue
-        try:
-            content = pyproject.read_text(encoding="utf-8")
-        except OSError:
-            continue
-        if 'name = "wenwengu"' in content:
-            return candidate
-
-    if required:
-        raise SystemExit(
-            "Unable to locate the wenwengu repository. Pass --repo /path/to/"
-            "stock_vale_valuation_3.0 or set WENWENGU_CLI_REPO."
-        )
-    return None
-
-
 def resolve_binary(explicit_bin: str | None) -> Path | None:
-    candidate = find_installed_binary(explicit_path=explicit_bin)
-    if candidate is None:
-        if explicit_bin or os.getenv("WENWENGU_CLI_BIN"):
-            binary_hint = explicit_bin or os.getenv("WENWENGU_CLI_BIN")
+    if explicit_bin:
+        explicit_path = Path(explicit_bin).expanduser().resolve()
+        if not explicit_path.exists():
             raise SystemExit(
-                "Configured wenwengu-cli binary was not found: "
-                f"{Path(str(binary_hint)).expanduser().resolve()}"
+                "Configured wenwengu valuation engine was not found: "
+                f"{explicit_path}"
             )
+        return explicit_path
+
+    env_bin = os.getenv("WENWENGU_CLI_BIN")
+    if env_bin:
+        env_path = Path(env_bin).expanduser().resolve()
+        if not env_path.exists():
+            raise SystemExit(
+                "Configured wenwengu valuation engine was not found: "
+                f"{env_path}"
+            )
+        return env_path
+
+    candidate = find_installed_binary()
+    if candidate is None:
         return None
     return candidate.path
 
@@ -92,12 +78,10 @@ def resolve_binary(explicit_bin: str | None) -> Path | None:
 def run_wenwengu_cli(
     cli_args: Sequence[str],
     *,
-    explicit_repo: str | None = None,
     explicit_bin: str | None = None,
 ) -> int:
     command, cwd = build_wenwengu_command(
         cli_args,
-        explicit_repo=explicit_repo,
         explicit_bin=explicit_bin,
     )
     completed = subprocess.run(command, cwd=cwd, check=False)
@@ -107,12 +91,10 @@ def run_wenwengu_cli(
 def capture_wenwengu_cli(
     cli_args: Sequence[str],
     *,
-    explicit_repo: str | None = None,
     explicit_bin: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
     command, cwd = build_wenwengu_command(
         cli_args,
-        explicit_repo=explicit_repo,
         explicit_bin=explicit_bin,
     )
     return subprocess.run(
@@ -130,19 +112,16 @@ def run_with_optional_summary(
     *,
     expected_kind: str,
     summarize: bool,
-    explicit_repo: str | None = None,
     explicit_bin: str | None = None,
 ) -> int:
     if not summarize:
         return run_wenwengu_cli(
             [subcommand, *ensure_output(cli_args, default_output="json")],
-            explicit_repo=explicit_repo,
             explicit_bin=explicit_bin,
         )
 
     completed = capture_wenwengu_cli(
         [subcommand, *ensure_json_output(cli_args)],
-        explicit_repo=explicit_repo,
         explicit_bin=explicit_bin,
     )
     return emit_summary_from_completed(completed, expected_kind=expected_kind)
@@ -210,49 +189,6 @@ def set_nested_value(payload: dict, dotted_key: str, value) -> None:
     current[parts[-1]] = value
 
 
-def validate_request_payload(
-    payload: dict,
-    *,
-    explicit_repo: str | None = None,
-) -> dict:
-    repo_root = resolve_repo_root(explicit_repo, required=True)
-    command = [
-        "uv",
-        "run",
-        "--project",
-        str(repo_root),
-        "python",
-        "-c",
-        (
-            "import json, sys; "
-            "from src.api.models import StockValuationRequest; "
-            "payload = json.load(sys.stdin); "
-            "request = StockValuationRequest.model_validate(payload); "
-            "print(request.model_dump_json(indent=2, exclude_none=False))"
-        ),
-    ]
-    completed = subprocess.run(
-        command,
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-        input=json.dumps(payload, ensure_ascii=False),
-    )
-    if completed.returncode != 0:
-        error_output = completed.stderr.strip() or completed.stdout.strip()
-        raise SystemExit(f"Request validation failed: {error_output}")
-    return parse_json_payload(completed.stdout)
-
-
-def materialize_default_request(
-    ts_code: str,
-    *,
-    explicit_repo: str | None = None,
-) -> dict:
-    return validate_request_payload({"ts_code": ts_code}, explicit_repo=explicit_repo)
-
-
 def create_temp_request_file(payload: dict) -> Path:
     with tempfile.NamedTemporaryFile(
         mode="w",
@@ -269,37 +205,40 @@ def create_temp_request_file(payload: dict) -> Path:
 def build_wenwengu_command(
     cli_args: Sequence[str],
     *,
-    explicit_repo: str | None = None,
     explicit_bin: str | None = None,
 ) -> tuple[list[str], Path]:
     binary_path = resolve_binary(explicit_bin)
-    repo_root = resolve_repo_root(explicit_repo, required=binary_path is None)
-    cwd = repo_root or Path.cwd()
+    if binary_path is None:
+        binary_path = auto_install_engine()
+
+    cwd = Path.cwd()
 
     if binary_path is not None:
         command = [str(binary_path), *cli_args]
     else:
-        if repo_root is None:
-            raise SystemExit(
-                "Unable to locate a packaged wenwengu-cli binary or repo checkout. "
-                "If you are using OpenClaw, install the binary into "
-                "~/.openclaw/tools/wenwengu-cli/runtime/ via the Skills UI or "
-                "run scripts/install_binary.py."
-            )
-        command = ["uv", "run", "--project", str(repo_root), "wenwengu-cli", *cli_args]
+        raise SystemExit(
+            "Unable to locate the wenwengu valuation engine. "
+            "Run scripts/install_engine.py and try again."
+        )
 
     return command, cwd
 
 
-def assert_wenwengu_repo(repo_root: Path) -> None:
-    pyproject = repo_root / "pyproject.toml"
-    if not pyproject.exists():
-        raise SystemExit(f"pyproject.toml not found under {repo_root}")
-
+def auto_install_engine() -> Path:
+    layout = detect_preferred_layout()
+    sys.stderr.write(
+        "未发现可用的 wenwengu 估值引擎，正在自动安装后继续执行。\n"
+    )
     try:
-        content = pyproject.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise SystemExit(f"Unable to read {pyproject}: {exc}") from exc
+        result = install_binary(layout=layout, force=False)
+    except SystemExit as exc:
+        message = str(exc).strip() or "unknown install error"
+        raise SystemExit(
+            "自动安装估值引擎失败。"
+            f"详细原因: {message}。"
+            "可以稍后手动运行 scripts/install_engine.py。"
+        ) from exc
 
-    if 'name = "wenwengu"' not in content:
-        raise SystemExit(f"{repo_root} does not look like the wenwengu repository")
+    installed_path = Path(result["binary_path"]).expanduser().resolve()
+    sys.stderr.write(f"估值引擎已安装到 {installed_path}\n")
+    return installed_path

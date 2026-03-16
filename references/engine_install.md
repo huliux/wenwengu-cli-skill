@@ -1,31 +1,29 @@
-# Binary Install
+# Engine Install
 
-Use this guide when the user asks how to install, repair, or upgrade the packaged `wenwengu-cli` binary.
+Use this guide when the user asks how to install, repair, or upgrade the packaged `wenwengu-cli` valuation engine.
 
 ## Preferred path in OpenClaw
 
 If the user is running this skill through OpenClaw:
 
 1. Prefer the bundled install helper:
-   `python ~/.codex/skills/wenwengu-cli/scripts/install_binary.py`
-2. The packaged binary should land under:
-   `~/.openclaw/tools/wenwengu-cli/runtime/`
+   `python scripts/install_engine.py`
+2. The packaged engine should land under the platform-managed OpenClaw runtime layout.
 3. The wrappers in this skill will auto-discover that path.
+4. `doctor.py`, `run_valuation.py`, and `run_cli.py` will also try to auto-install the engine on first use.
 
 ```bash
-python ~/.codex/skills/wenwengu-cli/scripts/install_binary.py
-python ~/.codex/skills/wenwengu-cli/scripts/check_binary.py
-python ~/.codex/skills/wenwengu-cli/scripts/upgrade_binary.py
+python scripts/install_engine.py
+python scripts/check_engine.py
+python scripts/upgrade_engine.py
 ```
 
 Use the same helpers when the user wants a fully manual path outside OpenClaw.
 
-## Default install locations
+## Default install layouts
 
-- OpenClaw layout:
-  `~/.openclaw/tools/wenwengu-cli/runtime/`
-- Codex layout:
-  `~/.codex/tools/wenwengu-cli/runtime/`
+- OpenClaw runtime layout
+- Codex runtime layout
 
 ## Release source
 
@@ -33,6 +31,7 @@ The installer downloads from GitHub releases:
 
 - repo: `huliux/wenwengu-cli-skill`
 - default channel: `releases/latest/download`
+- fallback channel when no stable release exists yet: `releases/download/edge`
 
 Expected asset names:
 
@@ -48,7 +47,7 @@ Map these requests to the install helpers:
 - `把 skill 装好`
 - `安装 wenwengu-cli`
 - `检查 CLI 装好了没`
-- `升级到最新二进制`
+- `升级到最新估值引擎`
 - `修一下这个 skill 的本地安装`
 
 ## Reporting style
@@ -56,7 +55,7 @@ Map these requests to the install helpers:
 For install and upgrade flows, report:
 
 1. what path was chosen
-2. what binary version or release channel was targeted
-3. whether the binary is now runnable
+2. what release version or channel was targeted
+3. whether the engine is now runnable
 
 Do not ask the user to set `WENWENGU_CLI_BIN` unless auto-discovery failed.

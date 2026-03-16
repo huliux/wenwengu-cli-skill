@@ -12,10 +12,9 @@ from _common import normalize_cli_args, run_with_optional_summary
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="doctor.py",
-        description="Run wenwengu-cli doctor using repo or binary resolution.",
+        description="Run wenwengu-cli doctor using the installed valuation engine first.",
     )
-    parser.add_argument("--repo", help="Explicit repository root.")
-    parser.add_argument("--bin", help="Explicit wenwengu-cli binary path.")
+    parser.add_argument("--bin", help="Explicit valuation engine path.")
     parser.add_argument(
         "--summarize",
         action="store_true",
@@ -29,7 +28,6 @@ def main(argv: list[str] | None = None) -> int:
         cli_args,
         expected_kind="doctor",
         summarize=args.summarize,
-        explicit_repo=args.repo,
         explicit_bin=args.bin,
     )
 

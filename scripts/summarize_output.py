@@ -18,7 +18,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--kind",
-        choices=["auto", "valuation", "doctor", "screen", "data"],
+        choices=["auto", "valuation", "doctor"],
         default="auto",
         help="Payload kind. Defaults to auto-detect.",
     )

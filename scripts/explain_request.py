@@ -8,12 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from _common import (
-    materialize_default_request,
-    parse_json_payload,
-    resolve_repo_root,
-    validate_request_payload,
-)
+from _common import parse_json_payload
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -21,51 +16,17 @@ def main(argv: list[str] | None = None) -> int:
         prog="explain_request.py",
         description="Explain a wenwengu request.json in plain language.",
     )
-    parser.add_argument("--repo", help="Explicit repository root for validation.")
     parser.add_argument("--input", required=True, help="Request JSON file path.")
-    parser.add_argument(
-        "--validate",
-        dest="validate",
-        action="store_true",
-        default=True,
-        help="Validate the request against the repo model before explaining it.",
-    )
-    parser.add_argument(
-        "--no-validate",
-        dest="validate",
-        action="store_false",
-        help="Explain the raw JSON without model validation.",
-    )
 
     args = parser.parse_args(argv)
     payload = parse_json_payload(Path(args.input).read_text(encoding="utf-8"))
-    if args.validate:
-        repo_root = resolve_repo_root(args.repo, required=False)
-        if repo_root is None:
-            print(
-                "No wenwengu repo checkout found; explaining raw request without model validation.",
-                file=sys.stderr,
-            )
-            args.validate = False
-        else:
-            payload = validate_request_payload(payload, explicit_repo=args.repo)
-
-    print(explain_request_payload(payload, explicit_repo=args.repo if args.validate else None))
+    print(explain_request_payload(payload))
     return 0
 
 
-def explain_request_payload(
-    payload: dict[str, Any],
-    *,
-    explicit_repo: str | None = None,
-) -> str:
+def explain_request_payload(payload: dict[str, Any]) -> str:
     ts_code = payload.get("ts_code", "N/A")
-    default_payload = (
-        materialize_default_request(ts_code, explicit_repo=explicit_repo)
-        if explicit_repo and ts_code != "N/A"
-        else {}
-    )
-    changed_fields = _collect_changed_paths(payload, default_payload)
+    changed_fields = _collect_changed_paths(payload, {})
 
     sensitivity = payload.get("sensitivity_analysis") or {}
     row_axis = sensitivity.get("row_axis") or {}

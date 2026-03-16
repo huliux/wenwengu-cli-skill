@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Binary install and discovery helpers for the wenwengu-cli skill."""
+"""Engine install and discovery helpers for the wenwengu-cli skill."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_REPO_SLUG = "huliux/wenwengu-cli-skill"
+DEFAULT_REPO_SLUG = os.getenv("WENWENGU_RELEASE_SOURCE", "huliux/wenwengu-cli-skill")
 DEFAULT_SKILL_KEY = "wenwengu-cli"
 
 
@@ -74,7 +74,7 @@ def resolve_asset_spec(
             )
 
     raise SystemExit(
-        "Unsupported platform for packaged wenwengu-cli binary: "
+        "Unsupported platform for packaged wenwengu-cli engine: "
         f"{system_name}/{machine_name}"
     )
 
@@ -85,6 +85,18 @@ def default_openclaw_runtime_dir() -> Path:
 
 def default_codex_runtime_dir() -> Path:
     return Path.home() / ".codex" / "tools" / DEFAULT_SKILL_KEY / "runtime"
+
+
+def detect_preferred_layout() -> str:
+    script_path = Path(__file__).expanduser().resolve()
+    script_text = str(script_path)
+    if "/.openclaw/" in script_text:
+        return "openclaw"
+    if "/.codex/" in script_text:
+        return "codex"
+    if (Path.home() / ".openclaw").exists():
+        return "openclaw"
+    return "codex"
 
 
 def build_release_url(
@@ -178,7 +190,13 @@ def install_binary(
                 version=version,
                 asset_name=asset_spec.asset_name,
             )
-            download_archive(source_url, archive_path)
+            source_url = download_release_archive(
+                repo_slug=repo_slug,
+                version=version,
+                asset_name=asset_spec.asset_name,
+                explicit_url=asset_url,
+                destination=archive_path,
+            )
 
         extracted_dir = temp_root_path / "extracted"
         extracted_dir.mkdir(parents=True, exist_ok=True)
@@ -191,7 +209,7 @@ def install_binary(
         binary_path = extracted_dir / asset_spec.binary_name
         if not binary_path.exists():
             raise SystemExit(
-                f"Installed archive did not contain expected binary: {asset_spec.binary_name}"
+                f"Installed archive did not contain expected engine executable: {asset_spec.binary_name}"
             )
 
         if os.name != "nt":
@@ -244,7 +262,40 @@ def download_archive(url: str, destination: Path) -> None:
         with urllib.request.urlopen(request) as response, destination.open("wb") as handle:
             shutil.copyfileobj(response, handle)
     except Exception as exc:
-        raise SystemExit(f"Failed to download binary archive from {url}: {exc}") from exc
+        raise SystemExit(f"Failed to download engine package from {url}: {exc}") from exc
+
+
+def download_release_archive(
+    *,
+    repo_slug: str,
+    version: str,
+    asset_name: str,
+    explicit_url: str | None,
+    destination: Path,
+) -> str:
+    if explicit_url:
+        download_archive(explicit_url, destination)
+        return explicit_url
+
+    candidate_urls = [
+        build_release_url(repo_slug=repo_slug, version=version, asset_name=asset_name)
+    ]
+    if version == "latest":
+        candidate_urls.append(
+            build_release_url(repo_slug=repo_slug, version="edge", asset_name=asset_name)
+        )
+
+    last_error: SystemExit | None = None
+    for candidate_url in candidate_urls:
+        try:
+            download_archive(candidate_url, destination)
+            return candidate_url
+        except SystemExit as exc:
+            last_error = exc
+
+    if last_error is not None:
+        raise last_error
+    raise SystemExit("Failed to resolve a release download URL for the valuation engine.")
 
 
 def extract_archive(*, archive_path: Path, archive_type: str, target_dir: Path) -> None:

@@ -67,14 +67,14 @@ Preferred structure:
 
 1. What the request is valuing
 2. Which assumptions matter most
-3. Which fields differ from defaults
+3. Which fields were explicitly customized
 
 Template:
 
 ```text
 这个请求是在给 {ts_code} 做 {forecast_years} 年期 DCF 估值。
 关键设定是终值法 {terminal_method}，以及 {wacc_overrides_or_none}。
-相对默认请求，主要改动字段是 {changed_fields}。
+这个请求里显式设置的关键字段是 {changed_fields}。
 ```
 
 ## Doctor
@@ -90,37 +90,21 @@ Template:
 ```text
 环境检查结果是 {runnable_or_blocked}。
 当前主要问题是 {failed_checks_or_none}。
-如果要继续执行 {next_task}，需要先修复这些项。
+如果要继续执行估值，需要先修复这些项。
 ```
 
-## Binary Install / Upgrade
+## Engine Install / Upgrade
 
 Preferred structure:
 
 1. What install path was used
-2. Whether the binary is now runnable
+2. Whether the engine is now runnable
 3. What the user should do next
 
 Template:
 
 ```text
-已把 wenwengu-cli 安装到 {binary_path}。
-当前二进制 {runnable_or_not}。
-下一步可以直接运行估值、筛选或诊断流程；如果仍然找不到 CLI，再检查自动发现路径或显式指定 `WENWENGU_CLI_BIN`。
-```
-
-## Screening
-
-Preferred structure:
-
-1. What filter was applied
-2. How many records matched
-3. Which results are worth looking at first
-
-Template:
-
-```text
-按 {filters} 跑了筛选。
-结果命中 {count} 条记录。
-优先看这几只: {top_records_preview}
+已把 wenwengu 估值引擎安装到 {binary_path}。
+当前估值引擎 {runnable_or_not}。
+下一步可以直接运行诊断或估值；如果仍然找不到引擎，再检查自动发现路径或显式指定 `WENWENGU_CLI_BIN`。
 ```

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a validated request.json for complex wenwengu valuation runs."""
+"""Generate a reproducible request.json for complex wenwengu valuation runs."""
 
 from __future__ import annotations
 
@@ -12,10 +12,8 @@ from _common import (
     create_temp_request_file,
     parse_json_payload,
     parse_override_value,
-    resolve_repo_root,
     set_nested_value,
     split_override,
-    validate_request_payload,
 )
 from presets import (
     format_preset_listing,
@@ -29,7 +27,6 @@ def build_parser() -> argparse.ArgumentParser:
         prog="make_request.py",
         description="Generate a request.json for wenwengu-cli valuate.",
     )
-    parser.add_argument("--repo", help="Explicit repository root for validation.")
     parser.add_argument(
         "--base-request",
         help="Load an existing request.json first, then merge preset and flag overrides on top.",
@@ -128,19 +125,6 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print the generated JSON to stdout. This is the default if no file target is set.",
     )
-    parser.add_argument(
-        "--validate",
-        dest="validate",
-        action="store_true",
-        default=True,
-        help="Validate the payload with the repository request model. Default: enabled.",
-    )
-    parser.add_argument(
-        "--no-validate",
-        dest="validate",
-        action="store_false",
-        help="Skip repository-side request validation.",
-    )
     return parser
 
 
@@ -152,18 +136,7 @@ def main(argv: list[str] | None = None) -> int:
         print(format_preset_listing())
         return 0
 
-    if args.validate:
-        repo_root = resolve_repo_root(args.repo, required=False)
-        if repo_root is None:
-            print(
-                "No wenwengu repo checkout found; skipping request model validation.",
-                file=sys.stderr,
-            )
-            args.validate = False
-
     payload = build_payload(args)
-    if args.validate:
-        payload = validate_request_payload(payload, explicit_repo=args.repo)
 
     destination_count = sum(
         1 for enabled in [bool(args.output_file), args.temp_file, args.stdout] if enabled

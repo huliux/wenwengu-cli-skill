@@ -6,34 +6,34 @@ This repository is intentionally minimal. It contains:
 
 - the publishable `wenwengu-cli` skill
 - installation and usage references
-- GitHub Releases with packaged `wenwengu-cli` binaries
+- ready-to-edit `request.json` templates
+- GitHub Releases with packaged `wenwengu-cli` valuation engines
 
-The implementation source and CLI build pipeline live in a separate private repository.
-Release assets are built upstream and then published into this repository.
+Release assets are built in CI and then published into this repository.
 
 ## Install
 
 ### OpenClaw
 
-Install the skill, then run the bundled installer so the binary lands in the
-OpenClaw runtime layout:
+Install the skill, then either run the bundled installer or let the first real
+command auto-install the valuation engine into the OpenClaw runtime layout:
 
 ```bash
-python scripts/install_binary.py
-python scripts/check_binary.py
+python scripts/install_engine.py
+python scripts/check_engine.py
 ```
 
-The installer downloads the latest packaged binary from this repository's
-GitHub Releases and places it under `~/.openclaw/tools/wenwengu-cli/runtime/`
-by default.
+The installer downloads the latest packaged engine from this repository's
+GitHub Releases and places it into the platform-managed runtime layout by
+default.
 
 ### Manual
 
 You can also install with the bundled helper script:
 
 ```bash
-python scripts/install_binary.py
-python scripts/check_binary.py
+python scripts/install_engine.py
+python scripts/check_engine.py
 ```
 
 ## Release assets
@@ -47,5 +47,21 @@ Expected asset names:
 
 ## Notes
 
-- Runtime configuration such as `TUSHARE_TOKEN`, database credentials, and LLM API keys are still provided at runtime via environment variables or `.env`.
-- The packaged binary is not embedded in the skill files themselves; it is distributed via GitHub Releases.
+- Runtime configuration such as `TUSHARE_TOKEN` is still provided at runtime via environment variables or `.env`.
+- The public CLI is valuation-only and uses Tushare as its data source.
+- The packaged valuation engine is not embedded in the skill files themselves; it is distributed via GitHub Releases.
+
+## Templates
+
+Starter valuation templates live under:
+
+- `templates/request/base_request.json`
+- `templates/request/conservative_request.json`
+- `templates/request/sensitivity_wacc_exit_standard.json`
+- `templates/request/ui_full_example.json`
+
+Copy one of these, adjust the stock code and assumptions, then run:
+
+```bash
+python scripts/run_valuation.py --request-file ./templates/request/base_request.json --output json --save-json ./outputs/result.json
+```

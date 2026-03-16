@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Upgrade the packaged wenwengu-cli binary."""
+"""Install the packaged wenwengu valuation engine for OpenClaw or Codex use."""
 
 from __future__ import annotations
 
 import argparse
 import sys
 
-from binary_manager import install_binary
+from binary_manager import DEFAULT_REPO_SLUG, detect_preferred_layout, install_binary
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="upgrade_binary.py",
-        description="Upgrade the packaged wenwengu-cli binary.",
+        prog="install_engine.py",
+        description="Install the packaged wenwengu valuation engine.",
     )
     parser.add_argument(
         "--version",
@@ -20,23 +20,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Release tag to install. Default: latest.",
     )
     parser.add_argument(
-        "--repo-slug",
-        default="huliux/wenwengu-cli-skill",
-        help="GitHub repo slug used for release downloads.",
+        "--release-source",
+        default=DEFAULT_REPO_SLUG,
+        help="GitHub release source used for engine downloads.",
     )
     parser.add_argument(
         "--layout",
         choices=["openclaw", "codex"],
-        default="openclaw",
-        help="Install layout. Default: openclaw.",
+        help="Install layout. Default: auto-detect from current runtime.",
     )
     parser.add_argument(
         "--archive-file",
-        help="Upgrade from a local archive file instead of downloading from GitHub.",
+        help="Install from a local package file instead of downloading from GitHub.",
     )
     parser.add_argument(
         "--asset-url",
-        help="Override the binary download URL.",
+        help="Override the engine download URL.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace any existing installed engine.",
     )
     return parser
 
@@ -45,16 +49,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    layout = args.layout or detect_preferred_layout()
+
     result = install_binary(
         version=args.version,
-        repo_slug=args.repo_slug,
-        layout=args.layout,
+        repo_slug=args.release_source,
+        layout=layout,
         archive_file=args.archive_file,
         asset_url=args.asset_url,
-        force=True,
+        force=args.force,
     )
 
-    print("二进制升级完成")
+    print("估值引擎安装完成")
     print(f"- 路径: {result['binary_path']}")
     print(f"- 布局: {result['layout']}")
     print(f"- 平台包: {result['asset_name']}")

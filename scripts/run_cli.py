@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locate the wenwengu repository and forward commands to wenwengu-cli."""
+"""Locate the wenwengu valuation engine and forward commands."""
 
 from __future__ import annotations
 
@@ -12,15 +12,11 @@ from _common import normalize_cli_args, run_wenwengu_cli
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="run_cli.py",
-        description="Run wenwengu-cli from a detected repo path or packaged binary.",
-    )
-    parser.add_argument(
-        "--repo",
-        help="Explicit repository root. Defaults to WENWENGU_CLI_REPO or the nearest parent wenwengu repo.",
+        description="Run wenwengu-cli from an installed valuation engine.",
     )
     parser.add_argument(
         "--bin",
-        help="Explicit wenwengu-cli binary path. Defaults to WENWENGU_CLI_BIN when set.",
+        help="Explicit valuation engine path. Defaults to WENWENGU_CLI_BIN when set.",
     )
 
     args, raw_cli_args = parser.parse_known_args(argv)
@@ -32,7 +28,6 @@ def main(argv: list[str] | None = None) -> int:
 
     return run_wenwengu_cli(
         cli_args,
-        explicit_repo=args.repo,
         explicit_bin=args.bin,
     )
 

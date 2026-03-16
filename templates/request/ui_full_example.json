@@ -1,0 +1,40 @@
+{
+  "ts_code": "600519.SH",
+  "valuation_date": "2026-03-16",
+  "forecast_years": 5,
+  "ltm_baseline_enabled": false,
+  "cagr_decay_rate": 0.1,
+  "op_margin_forecast_mode": "historical_median",
+  "cogs_forecast_mode": "residual",
+  "sga_rd_ratio_forecast_mode": "historical_median",
+  "da_ratio_forecast_mode": "historical_median",
+  "capex_ratio_forecast_mode": "historical_median",
+  "nwc_baseline_mode": "component",
+  "nwc_days_forecast_mode": "historical_median",
+  "nwc_days_transition_years": 3,
+  "other_nwc_ratio_forecast_mode": "historical_median",
+  "target_effective_tax_rate": 0.25,
+  "wacc_weight_mode": "market",
+  "cost_of_debt": 0.05,
+  "risk_free_rate": 0.03,
+  "beta": 1.0,
+  "market_risk_premium": 0.05,
+  "country_risk_premium": 0.0,
+  "industry_risk_premium": 0.0,
+  "terminal_value_method": "exit_multiple",
+  "exit_multiple": 7.0,
+  "use_gdp_cap": true,
+  "gdp_nominal_cap": 0.05,
+  "mid_year_convention": false,
+  "request_llm_summary": false,
+  "sensitivity_analysis": {
+    "row_axis": {
+      "parameter_name": "wacc",
+      "values": [0.0509, 0.0559, 0.0609, 0.0659, 0.0709]
+    },
+    "column_axis": {
+      "parameter_name": "exit_multiple",
+      "values": [6.0, 6.5, 7.0, 7.5, 8.0]
+    }
+  }
+}
