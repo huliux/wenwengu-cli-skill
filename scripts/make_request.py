@@ -44,7 +44,9 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="List supported valuation and sensitivity presets, then exit.",
     )
-    parser.add_argument("--ts-code", help="Stock code, for example 600519.SH.")
+    parser.add_argument(
+        "--ts-code", help="Stock code in ts_code format, such as <ts_code>."
+    )
     parser.add_argument(
         "--label", help="Optional scenario label for downstream workflows."
     )

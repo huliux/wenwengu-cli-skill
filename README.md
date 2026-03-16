@@ -58,6 +58,7 @@ Recommended setup:
 ```bash
 openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
 openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
 openclaw gateway restart
 ```
 
@@ -65,6 +66,7 @@ Alternative explicit env binding:
 
 ```bash
 openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
 openclaw gateway restart
 ```
 
@@ -74,6 +76,9 @@ Fallback for shell/service environments:
 echo 'TUSHARE_TOKEN=your_tushare_token' >> ~/.openclaw/.env
 openclaw gateway restart
 ```
+
+After changing skill env or `~/.openclaw/.env`, start a new OpenClaw session
+to avoid stale environment snapshots.
 
 ## Templates
 
@@ -89,3 +94,17 @@ Copy one of these, adjust the stock code and assumptions, then run:
 ```bash
 python scripts/run_valuation.py --request-file ./templates/request/base_request.json --output json --save-json ./outputs/result.json
 ```
+
+## OpenClaw Agent Quick Prompts
+
+In OpenClaw chat, users can directly say:
+
+- `先检查一下这个估值 skill 能不能跑`
+- `给这只股票跑一个标准估值`
+- `给这只股票按高增长口径做 DCF，并做敏感性分析`
+- `比较一下基准和保守结果`
+
+`<ts_code>` is a placeholder in docs/examples. Replace it with a real stock code before execution.
+
+The skill will translate natural language into wrapper commands and return
+analysis-first summaries by default.

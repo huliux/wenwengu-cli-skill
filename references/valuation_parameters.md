@@ -14,14 +14,19 @@ Bundled starter templates live under:
 - `templates/request/sensitivity_wacc_exit_standard.json`
 - `templates/request/ui_full_example.json`
 
+Placeholder note:
+
+- `<ts_code>` is a placeholder used in docs. Replace it with a real stock code before running commands.
+
 ## 1. Quick Start
 
 ### Minimal commands
 
 ```bash
+TS_CODE="<ts_code>"
 python scripts/run_cli.py doctor --output table
-python scripts/run_valuation.py --ts-code 600519.SH --forecast-years 5 --output table
-python scripts/run_valuation.py --ts-code 600519.SH --forecast-years 5 --save-json ./outputs/moutai.json --output json
+python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --output table
+python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --save-json ./outputs/valuation.json --output json
 ```
 
 ### When to use what
@@ -37,7 +42,7 @@ These are valuation flags available on `valuate`, typically passed through
 
 | Flag | Purpose | Typical use |
 | --- | --- | --- |
-| `--ts-code` | Stock code such as `600519.SH` | Simple standard valuation |
+| `--ts-code` | Stock code such as `<ts_code>` | Simple standard valuation |
 | `--valuation-date` | Valuation anchor date | Backtesting or fixed-date reruns |
 | `--forecast-years` | Explicit forecast horizon | Quick change from 5Y to 3Y/7Y |
 | `--ltm-baseline` | Use LTM instead of latest annual report | Interim-period analysis |
@@ -273,24 +278,26 @@ If the user does not specify much, start here:
 ### Simple direct-run
 
 ```bash
-python scripts/run_valuation.py --ts-code 600519.SH --forecast-years 5 --output table
+TS_CODE="<ts_code>"
+python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --output table
 ```
 
 ### Save a reproducible result
 
 ```bash
+TS_CODE="<ts_code>"
 python scripts/run_valuation.py \
-  --ts-code 600519.SH \
+  --ts-code "$TS_CODE" \
   --forecast-years 5 \
   --output json \
-  --save-json ./outputs/moutai-base.json
+  --save-json ./outputs/base-result.json
 ```
 
 ### Full request file close to the mobile UI
 
 ```json
 {
-  "ts_code": "600519.SH",
+  "ts_code": "<ts_code>",
   "valuation_date": "2026-03-16",
   "forecast_years": 5,
   "cagr_decay_rate": 0.10,

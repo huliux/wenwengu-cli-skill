@@ -27,6 +27,7 @@ Recommended:
 ```bash
 openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
 openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
 openclaw gateway restart
 ```
 
@@ -34,6 +35,7 @@ Alternative explicit env binding:
 
 ```bash
 openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
 openclaw gateway restart
 ```
 
@@ -43,6 +45,8 @@ Fallback:
 echo 'TUSHARE_TOKEN=your_tushare_token' >> ~/.openclaw/.env
 openclaw gateway restart
 ```
+
+After env changes, start a new OpenClaw session before re-running `doctor`/`valuate`.
 
 ## Default install layouts
 

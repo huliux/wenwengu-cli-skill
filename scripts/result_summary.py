@@ -25,6 +25,23 @@ def detect_payload_kind(payload: dict[str, Any]) -> str:
 
 
 def summarize_valuation(payload: dict[str, Any]) -> str:
+    error_text = str(payload.get("error") or "").strip()
+    if error_text:
+        lines = [
+            "估值摘要",
+            f"- 结论: 估值执行失败：{error_text}",
+        ]
+        if "股票代码匹配" in error_text:
+            lines.extend(
+                [
+                    "- 建议修复: 确保 OpenClaw skill 环境固定为 tushare，然后升级到最新估值引擎。",
+                    '- 命令: openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"',
+                    "- 命令: openclaw gateway restart",
+                    "- 命令: python scripts/upgrade_engine.py",
+                ]
+            )
+        return "\n".join(lines)
+
     stock_info = payload.get("stock_info") or {}
     valuation_results = payload.get("valuation_results") or {}
     dcf_details = valuation_results.get("dcf_forecast_details") or {}
@@ -93,6 +110,7 @@ def summarize_doctor(payload: dict[str, Any]) -> str:
                 "- 建议修复: 在 OpenClaw 配置 TUSHARE token 后重试。",
                 '- 命令: openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"',
                 '- 命令: openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"',
+                '- 命令: openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"',
                 "- 命令: openclaw gateway restart",
             ]
         )

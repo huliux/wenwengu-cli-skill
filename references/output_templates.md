@@ -93,6 +93,17 @@ Template:
 如果要继续执行估值，需要先修复这些项。
 ```
 
+OpenClaw-specific follow-up when blocked by env:
+
+```text
+先在 OpenClaw 配置 token 和数据源，再重试：
+openclaw config set skills.entries.wenwengu-cli.apiKey "<你的token>"
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
+openclaw gateway restart
+然后新开一个会话再跑估值。
+```
+
 ## Engine Install / Upgrade
 
 Preferred structure:
@@ -107,4 +118,22 @@ Template:
 已把 wenwengu 估值引擎安装到 {binary_path}。
 当前估值引擎 {runnable_or_not}。
 下一步可以直接运行诊断或估值；如果仍然找不到引擎，再检查自动发现路径或显式指定 `WENWENGU_CLI_BIN`。
+```
+
+## Valuation Failure: Stock Match
+
+Preferred structure:
+
+1. State the blocker in one line
+2. Trigger one repair action
+3. Retry once
+4. Report final state
+
+Template:
+
+```text
+这次估值失败，阻塞点是：{error_message}。
+我已执行修复：升级估值引擎并重试一次。
+重试结果：{retry_result}。
+如果仍失败，我会附上本次 request 供排查。
 ```

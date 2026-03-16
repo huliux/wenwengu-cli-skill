@@ -64,6 +64,34 @@ Use [references/engine_install.md](references/engine_install.md) for install and
 Use `run_cli.py` only for uncommon flag combinations not already covered by the
 specialized wrappers.
 
+## OpenClaw Agent Contract
+
+When running inside OpenClaw, follow these rules strictly:
+
+- Always run commands from the skill root with relative paths, for example:
+  - `python scripts/doctor.py --summarize`
+  - `python scripts/run_valuation.py --ts-code <ts_code> --summarize`
+- Prefer wrapper scripts over direct binary invocation.
+- Keep this skill valuation-only and Tushare-only.
+- Do not ask users to clone any local repo.
+- Do not ask users to provide CLI flags directly; translate natural language into commands.
+
+Session behavior:
+
+1. If session health is unknown, run `doctor.py --summarize` first.
+2. If doctor fails on token/env, return exact OpenClaw config commands.
+3. After user changes OpenClaw env/config, remind to:
+   - `openclaw gateway restart`
+   - start a new OpenClaw conversation/session
+4. For regular valuation requests, default to `--summarize` unless user asks for raw JSON.
+
+Failure recovery:
+
+- If valuation fails with `无法找到有效的股票代码匹配`:
+  1. run `python scripts/upgrade_engine.py`
+  2. rerun the same valuation once
+  3. if still failing, return concise blocker + request payload for debugging
+
 ## Natural-Language Routing
 
 Map user intent to the nearest stable workflow:
@@ -78,6 +106,9 @@ Map user intent to the nearest stable workflow:
 - "做标准敏感性分析" -> add a sensitivity preset, then `run_valuation.py`
 - "解释这个 request.json" -> `explain_request.py`
 - "比较两个结果", "基准和保守差多少" -> `compare_results.py`
+- "给某只股票做高增长 DCF" -> `make_request.py --preset high-growth --ts-code <ts_code>`, then `run_valuation.py --summarize`
+- "按永续增长做敏感性" -> prefer `wacc-pgr-standard`
+- "按退出乘数做敏感性" -> prefer `wacc-exit-standard`
 
 When mapping fuzzy phrases to presets, use [references/presets.md](references/presets.md).
 When the user's wording is conversational or underspecified, use [references/dialogue_examples.md](references/dialogue_examples.md).
@@ -106,8 +137,9 @@ Lead with the conclusion, then the key numbers, then warnings or caveats.
 Use the wrappers in this skill as the primary entrypoint:
 
 ```bash
+TS_CODE="<ts_code>"
 python scripts/run_cli.py doctor --output json
-python scripts/run_valuation.py --ts-code 600519.SH --forecast-years 5 --output table
+python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --output table
 python scripts/run_valuation.py --request-file request.json --output json --save-json ./outputs/result.json
 python scripts/run_valuation.py --request-file request.json --set beta=1.10 --set exit_multiple=7.0 --output json
 ```
@@ -122,6 +154,10 @@ Use direct flags for simple requests:
 - `--set`
 - `--output`
 - `--save-json`
+
+Placeholder note:
+
+- `<ts_code>` is a placeholder. Replace it with a real stock code before running.
 
 Use `request.json` or `--set` for advanced assumptions such as WACC overrides,
 terminal value choices, or sensitivity matrices.
@@ -195,6 +231,7 @@ OpenClaw token setup (recommended):
 ```bash
 openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
 openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
 openclaw gateway restart
 ```
 
@@ -202,8 +239,11 @@ Alternative explicit env binding:
 
 ```bash
 openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
 openclaw gateway restart
 ```
+
+After env changes, start a new OpenClaw conversation/session before re-running valuation.
 
 ### `install_engine`
 
@@ -240,8 +280,9 @@ Use for single-stock valuation runs.
 Examples:
 
 ```bash
-python scripts/run_valuation.py --ts-code 600519.SH --forecast-years 5
-python scripts/run_valuation.py --ts-code 600519.SH --forecast-years 5 --summarize
+TS_CODE="<ts_code>"
+python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5
+python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --summarize
 python scripts/run_valuation.py --request-file request.json
 python scripts/run_valuation.py --request-file request.json --set beta=1.10 --set exit_multiple=7.0
 ```
@@ -261,9 +302,10 @@ Use for complex valuation scenarios that should become a reproducible `request.j
 Examples:
 
 ```bash
-python scripts/make_request.py --preset base --ts-code 600519.SH --temp-file
-python scripts/make_request.py --preset conservative --ts-code 600519.SH --sensitivity-preset wacc-exit-standard --temp-file
-python scripts/make_request.py --ts-code 600519.SH --terminal-value-method perpetual_growth --perpetual-growth-rate 0.025 --beta 1.10 --output-file ./requests/request.json
+TS_CODE="<ts_code>"
+python scripts/make_request.py --preset base --ts-code "$TS_CODE" --temp-file
+python scripts/make_request.py --preset conservative --ts-code "$TS_CODE" --sensitivity-preset wacc-exit-standard --temp-file
+python scripts/make_request.py --ts-code "$TS_CODE" --terminal-value-method perpetual_growth --perpetual-growth-rate 0.025 --beta 1.10 --output-file ./requests/request.json
 python scripts/make_request.py --base-request request.json --set sensitivity_analysis.row_axis.values=[0.0509,0.0559,0.0609,0.0659,0.0709]
 ```
 
@@ -290,9 +332,10 @@ python scripts/explain_request.py --input request.json
 Examples:
 
 ```bash
-python scripts/run_scenarios.py --ts-code 600519.SH
-python scripts/run_scenarios.py --ts-code 600519.SH --scenarios base,conservative,bull
-python scripts/run_scenarios.py --ts-code 600519.SH --sensitivity-preset wacc-exit-standard
+TS_CODE="<ts_code>"
+python scripts/run_scenarios.py --ts-code "$TS_CODE"
+python scripts/run_scenarios.py --ts-code "$TS_CODE" --scenarios base,conservative,bull
+python scripts/run_scenarios.py --ts-code "$TS_CODE" --sensitivity-preset wacc-exit-standard
 ```
 
 ### `compare_results`

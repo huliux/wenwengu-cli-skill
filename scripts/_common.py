@@ -88,7 +88,12 @@ def run_wenwengu_cli(
         cli_args,
         explicit_bin=explicit_bin,
     )
-    completed = subprocess.run(command, cwd=cwd, check=False)
+    completed = subprocess.run(
+        command,
+        cwd=cwd,
+        check=False,
+        env=build_runtime_env(),
+    )
     return completed.returncode
 
 
@@ -107,7 +112,15 @@ def capture_wenwengu_cli(
         check=False,
         capture_output=True,
         text=True,
+        env=build_runtime_env(),
     )
+
+
+def build_runtime_env() -> dict[str, str]:
+    env = os.environ.copy()
+    # Public skill scope is Tushare-only; keep runtime source deterministic.
+    env["DATA_SOURCE"] = "tushare"
+    return env
 
 
 def run_with_optional_summary(

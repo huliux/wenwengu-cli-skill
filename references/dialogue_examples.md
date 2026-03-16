@@ -9,6 +9,8 @@ command, wrapper, or preset explicitly.
 - Prefer the safest default when the wording is fuzzy.
 - Generate a `request.json` when the request has multiple assumptions or should be reproducible.
 - Return a concise analytical summary, not the raw command line, unless the user asks for it.
+- In OpenClaw, run wrappers from the skill root with relative paths.
+- After env changes, remind user to restart gateway and open a new session.
 
 ## Common Requests
 
@@ -61,6 +63,20 @@ Route:
 Defaults:
 - valuation preset: `base`
 - output: summary
+
+### High-growth single stock
+
+User:
+`基于这只股票的特点，给它跑 DCF`
+
+Route:
+- `make_request.py --preset high-growth --ts-code <ts_code> --sensitivity-preset wacc-pgr-standard`
+- `run_valuation.py --summarize`
+
+Defaults:
+- `forecast_years=7`
+- `terminal_value_method=perpetual_growth`
+- `perpetual_growth_rate=0.03`
 
 ### More optimistic or conservative
 
@@ -152,6 +168,12 @@ Report focus:
 Interpretation:
 - if no stock or target is known, do not guess a ticker
 - ask only for the missing stock
+
+### "报错了：无法找到有效的股票代码匹配"
+
+Interpretation:
+- run `upgrade_engine.py`, then rerun once
+- if still failing, return concise blocker + request payload + next action
 
 ### "标准版就行"
 

@@ -21,7 +21,9 @@ def main(argv: list[str] | None = None) -> int:
         description="Run multiple valuation scenario presets and summarize the result.",
     )
     parser.add_argument("--bin", help="Explicit valuation engine path.")
-    parser.add_argument("--ts-code", help="Stock code, for example 600519.SH.")
+    parser.add_argument(
+        "--ts-code", help="Stock code in ts_code format, such as <ts_code>."
+    )
     parser.add_argument(
         "--base-request",
         help="Optional base request.json merged under every scenario preset.",
