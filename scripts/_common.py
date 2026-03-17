@@ -9,7 +9,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Sequence
+from collections.abc import Sequence
 
 from binary_manager import (
     detect_preferred_layout,
@@ -118,8 +118,15 @@ def capture_wenwengu_cli(
 
 def build_runtime_env() -> dict[str, str]:
     env = os.environ.copy()
-    # Public skill scope is Tushare-only; keep runtime source deterministic.
-    env["DATA_SOURCE"] = "tushare"
+    if env.get("DATA_SOURCE"):
+        return env
+
+    if env.get("DATABASE_URL") or env.get("DB_USER"):
+        env["DATA_SOURCE"] = "postgres"
+        return env
+
+    if env.get("TUSHARE_TOKEN"):
+        env["DATA_SOURCE"] = "tushare"
     return env
 
 

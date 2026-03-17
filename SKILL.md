@@ -1,13 +1,13 @@
 ---
 name: wenwengu-cli
-description: "Local valuation workflow for the packaged wenwengu valuation engine. Use when Codex needs to run Tushare-based stock valuation, environment diagnostics, request generation, scenario comparison, or install/upgrade/check the packaged valuation engine instead of calling FastAPI directly or writing ad hoc Python."
+description: "Local valuation workflow for the packaged wenwengu valuation engine. Use when Codex needs to run stock valuation, check runtime diagnostics, or operate the packaged valuation engine with user-configured database or Tushare settings."
 metadata:
   {
     "openclaw":
       {
         "always": true,
         "skillKey": "wenwengu-cli",
-        "primaryEnv": "TUSHARE_TOKEN",
+        "primaryEnv": "DATABASE_URL",
         "emoji": "📈",
         "homepage": "https://github.com/huliux/wenwengu-cli-skill",
       },
@@ -27,6 +27,7 @@ Use this skill when the user wants to:
 - compare scenarios or compare two saved valuation results
 
 This public skill is valuation-only.
+It can read from a user-configured database or from Tushare, depending on runtime env.
 Do not route the user into stock screening, screener cache refresh, local repo setup, or ad hoc Python scripts.
 
 Users will speak in natural language.
@@ -72,14 +73,15 @@ When running inside OpenClaw, follow these rules strictly:
   - `python scripts/doctor.py --summarize`
   - `python scripts/run_valuation.py --ts-code <ts_code> --summarize`
 - Prefer wrapper scripts over direct binary invocation.
-- Keep this skill valuation-only and Tushare-only.
+- Keep this skill valuation-only.
+- Respect user-provided `DATA_SOURCE`, `DATABASE_URL`, and `DB_*` env values. Do not force Tushare.
 - Do not ask users to clone any local repo.
 - Do not ask users to provide CLI flags directly; translate natural language into commands.
 
 Session behavior:
 
 1. If session health is unknown, run `doctor.py --summarize` first.
-2. If doctor fails on token/env, return exact OpenClaw config commands.
+2. If doctor fails on env/config, return exact OpenClaw config commands.
 3. After user changes OpenClaw env/config, remind to:
    - `openclaw gateway restart`
    - start a new OpenClaw conversation/session
@@ -204,7 +206,7 @@ The user-facing sections you care about map like this:
 
 ## Safety Boundaries
 
-- This public skill is Tushare-only.
+- This public skill is valuation-only and supports runtime-selected data sources.
 - Do not assume a local project checkout is required.
 - Do not route the user into screening or data-refresh commands.
 - Prefer saving results to external JSON files with `--save-json` instead of inventing local cache flows.
@@ -213,10 +215,10 @@ The user-facing sections you care about map like this:
 
 ### `doctor`
 
-Use to verify:
+Use to verify the active valuation data source:
 
-- `TUSHARE_TOKEN`
-- Tushare connectivity
+- `DATABASE_URL` or `DB_*` connectivity when `DATA_SOURCE=postgres`
+- `TUSHARE_TOKEN` connectivity when `DATA_SOURCE=tushare`
 
 Examples:
 
@@ -226,16 +228,16 @@ python scripts/doctor.py --summarize
 python scripts/run_cli.py doctor --output table
 ```
 
-OpenClaw token setup (recommended):
+OpenClaw database setup (recommended):
 
 ```bash
-openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
-openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
-openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "DATABASE_URL"
+openclaw config set skills.entries.wenwengu-cli.env.DATABASE_URL "postgresql://user:password@host:5432/dbname"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "postgres"
 openclaw gateway restart
 ```
 
-Alternative explicit env binding:
+Alternative Tushare setup:
 
 ```bash
 openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"

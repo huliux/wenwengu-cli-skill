@@ -47,22 +47,22 @@ Expected asset names:
 
 ## Notes
 
-- Runtime configuration such as `TUSHARE_TOKEN` is provided at runtime.
-- The public CLI is valuation-only and uses Tushare as its data source.
+- Runtime configuration is provided at runtime.
+- The public CLI is valuation-only and can read from a user-configured database or Tushare.
 - The packaged valuation engine is not embedded in the skill files themselves; it is distributed via GitHub Releases.
 
-## Tushare Token Setup (OpenClaw)
+## Database Setup (OpenClaw)
 
 Recommended setup:
 
 ```bash
-openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
-openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
-openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "DATABASE_URL"
+openclaw config set skills.entries.wenwengu-cli.env.DATABASE_URL "postgresql://user:password@host:5432/dbname"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "postgres"
 openclaw gateway restart
 ```
 
-Alternative explicit env binding:
+Alternative Tushare setup:
 
 ```bash
 openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
@@ -73,7 +73,8 @@ openclaw gateway restart
 Fallback for shell/service environments:
 
 ```bash
-echo 'TUSHARE_TOKEN=your_tushare_token' >> ~/.openclaw/.env
+echo 'DATABASE_URL=postgresql://user:password@host:5432/dbname' >> ~/.openclaw/.env
+echo 'DATA_SOURCE=postgres' >> ~/.openclaw/.env
 openclaw gateway restart
 ```
 

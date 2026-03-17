@@ -34,8 +34,7 @@ def summarize_valuation(payload: dict[str, Any]) -> str:
         if "股票代码匹配" in error_text:
             lines.extend(
                 [
-                    "- 建议修复: 确保 OpenClaw skill 环境固定为 tushare，然后升级到最新估值引擎。",
-                    '- 命令: openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"',
+                    "- 建议修复: 检查 DATA_SOURCE 与数据库或 Tushare 配置是否匹配，然后升级到最新估值引擎。",
                     "- 命令: openclaw gateway restart",
                     "- 命令: python scripts/upgrade_engine.py",
                 ]
@@ -71,6 +70,7 @@ def summarize_valuation(payload: dict[str, Any]) -> str:
 
 
 def summarize_doctor(payload: dict[str, Any]) -> str:
+    data_source = payload.get("data_source", "unknown")
     failed_checks = [
         check for check in payload.get("checks", []) if check.get("status") == "fail"
     ]
@@ -86,7 +86,7 @@ def summarize_doctor(payload: dict[str, Any]) -> str:
         "环境诊断",
         f"- 结论: {conclusion}",
         f"- 总体状态: {payload.get('overall_status', 'unknown')}",
-        f"- 数据源: {payload.get('data_source', 'unknown')}",
+        f"- 数据源: {data_source}",
     ]
 
     if warn_checks:
@@ -104,7 +104,18 @@ def summarize_doctor(payload: dict[str, Any]) -> str:
     )
     lines.append(f"- 失败项: {failed_text}")
     has_tushare_fail = any(check.get("name") == "tushare" for check in failed_checks)
-    if has_tushare_fail:
+    has_postgres_fail = any(check.get("name") == "postgres" for check in failed_checks)
+    if has_postgres_fail or data_source == "postgres":
+        lines.extend(
+            [
+                "- 建议修复: 为 skill 配置数据库连接串或 DB_* 环境变量后重试。",
+                '- 命令: openclaw config set skills.entries.wenwengu-cli.primaryEnv "DATABASE_URL"',
+                '- 命令: openclaw config set skills.entries.wenwengu-cli.env.DATABASE_URL "postgresql://user:password@host:5432/dbname"',
+                '- 命令: openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "postgres"',
+                "- 命令: openclaw gateway restart",
+            ]
+        )
+    elif has_tushare_fail:
         lines.extend(
             [
                 "- 建议修复: 在 OpenClaw 配置 TUSHARE token 后重试。",

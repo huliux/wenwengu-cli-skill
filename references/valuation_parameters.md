@@ -24,9 +24,9 @@ Placeholder note:
 
 ```bash
 TS_CODE="<ts_code>"
-python scripts/run_cli.py doctor --output table
-python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --output table
-python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --save-json ./outputs/valuation.json --output json
+python scripts/run_cli.py doctor --data-source postgres --output table
+python scripts/run_valuation.py --data-source postgres --ts-code "$TS_CODE" --forecast-years 5 --output table
+python scripts/run_valuation.py --data-source postgres --ts-code "$TS_CODE" --forecast-years 5 --save-json ./outputs/valuation.json --output json
 ```
 
 ### When to use what
@@ -34,6 +34,22 @@ python scripts/run_valuation.py --ts-code "$TS_CODE" --forecast-years 5 --save-j
 - direct flags: only a few parameters changed
 - `--request-file`: complex or reproducible scenarios
 - `--set`: one or two precise overrides on top of a request file
+
+### Runtime data-source configuration
+
+Use one of these patterns before running valuation:
+
+- database via env: set `DATABASE_URL` and optionally `DATA_SOURCE=postgres`
+- database via flags: add `--data-source postgres --database-url <dsn>`
+- Tushare via env: set `TUSHARE_TOKEN` and `DATA_SOURCE=tushare`
+
+Examples:
+
+```bash
+python scripts/run_cli.py doctor --data-source postgres --database-url "postgresql://user:password@host:5432/dbname" --output json
+python scripts/run_valuation.py --data-source postgres --database-url "postgresql://user:password@host:5432/dbname" --ts-code "$TS_CODE" --output table
+TUSHARE_TOKEN="your_token" python scripts/run_cli.py doctor --data-source tushare --output table
+```
 
 ## 2. Shell Flags
 
@@ -43,6 +59,8 @@ These are valuation flags available on `valuate`, typically passed through
 | Flag | Purpose | Typical use |
 | --- | --- | --- |
 | `--ts-code` | Stock code such as `<ts_code>` | Simple standard valuation |
+| `--data-source postgres\|tushare` | Choose database-backed or Tushare-backed valuation | Control runtime data source explicitly |
+| `--database-url` | Per-run PostgreSQL connection string | Avoid relying on inherited env for a single command |
 | `--valuation-date` | Valuation anchor date | Backtesting or fixed-date reruns |
 | `--forecast-years` | Explicit forecast horizon | Quick change from 5Y to 3Y/7Y |
 | `--ltm-baseline` | Use LTM instead of latest annual report | Interim-period analysis |
@@ -54,7 +72,7 @@ These are valuation flags available on `valuate`, typically passed through
 Use `doctor` first if environment health is unknown:
 
 ```bash
-python scripts/run_cli.py doctor --output json
+python scripts/run_cli.py doctor --data-source postgres --output json
 ```
 
 ## 3. Output Sections

@@ -96,10 +96,10 @@ Template:
 OpenClaw-specific follow-up when blocked by env:
 
 ```text
-先在 OpenClaw 配置 token 和数据源，再重试：
-openclaw config set skills.entries.wenwengu-cli.apiKey "<你的token>"
-openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
-openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
+先在 OpenClaw 配置数据库连接和数据源，再重试：
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "DATABASE_URL"
+openclaw config set skills.entries.wenwengu-cli.env.DATABASE_URL "postgresql://user:password@host:5432/dbname"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "postgres"
 openclaw gateway restart
 然后新开一个会话再跑估值。
 ```

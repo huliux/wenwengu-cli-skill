@@ -1,4 +1,4 @@
 interface:
   display_name: "Wenwengu CLI"
-  short_description: "Translate natural-language valuation or engine setup requests into wenwengu workflows."
-  default_prompt: "Use $wenwengu-cli to translate natural-language valuation, diagnostics, scenario comparison, request explanation, or valuation engine install requests into wenwengu CLI workflows."
+  short_description: "Translate valuation, diagnostics, and engine setup requests into wenwengu CLI workflows with database or Tushare runtime config."
+  default_prompt: "Use $wenwengu-cli to translate natural-language valuation, diagnostics, scenario comparison, request explanation, or valuation engine install requests into wenwengu CLI workflows, respecting user-configured database or Tushare settings."

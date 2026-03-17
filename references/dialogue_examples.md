@@ -23,8 +23,8 @@ Route:
 - `doctor.py --summarize`
 
 Report focus:
-- missing `TUSHARE_TOKEN`
-- Tushare connectivity
+- missing `DATABASE_URL` or `DB_*`
+- database or Tushare connectivity, depending on `DATA_SOURCE`
 
 ### Skill install or repair
 

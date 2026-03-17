@@ -20,18 +20,18 @@ python scripts/upgrade_engine.py
 
 Use the same helpers when the user wants a fully manual path outside OpenClaw.
 
-## Tushare token setup in OpenClaw
+## Runtime setup in OpenClaw
 
 Recommended:
 
 ```bash
-openclaw config set skills.entries.wenwengu-cli.apiKey "your_tushare_token"
-openclaw config set skills.entries.wenwengu-cli.primaryEnv "TUSHARE_TOKEN"
-openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "tushare"
+openclaw config set skills.entries.wenwengu-cli.primaryEnv "DATABASE_URL"
+openclaw config set skills.entries.wenwengu-cli.env.DATABASE_URL "postgresql://user:password@host:5432/dbname"
+openclaw config set skills.entries.wenwengu-cli.env.DATA_SOURCE "postgres"
 openclaw gateway restart
 ```
 
-Alternative explicit env binding:
+Alternative Tushare setup:
 
 ```bash
 openclaw config set skills.entries.wenwengu-cli.env.TUSHARE_TOKEN "your_tushare_token"
@@ -42,7 +42,8 @@ openclaw gateway restart
 Fallback:
 
 ```bash
-echo 'TUSHARE_TOKEN=your_tushare_token' >> ~/.openclaw/.env
+echo 'DATABASE_URL=postgresql://user:password@host:5432/dbname' >> ~/.openclaw/.env
+echo 'DATA_SOURCE=postgres' >> ~/.openclaw/.env
 openclaw gateway restart
 ```
 
