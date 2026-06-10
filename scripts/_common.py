@@ -121,12 +121,12 @@ def build_runtime_env() -> dict[str, str]:
     if env.get("DATA_SOURCE"):
         return env
 
-    if env.get("DATABASE_URL") or env.get("DB_USER"):
-        env["DATA_SOURCE"] = "postgres"
-        return env
-
     if env.get("TUSHARE_TOKEN"):
         env["DATA_SOURCE"] = "tushare"
+        return env
+
+    if env.get("DATABASE_URL") or env.get("DB_USER"):
+        env["DATA_SOURCE"] = "postgres"
     return env
 
 

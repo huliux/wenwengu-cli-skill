@@ -75,6 +75,8 @@ When running inside OpenClaw, follow these rules strictly:
 - Prefer wrapper scripts over direct binary invocation.
 - Keep this skill valuation-only.
 - Respect user-provided `DATA_SOURCE`, `DATABASE_URL`, and `DB_*` env values. Do not force Tushare.
+- If `DATA_SOURCE` is unset and both database env and `TUSHARE_TOKEN` exist,
+  wrapper defaults should prefer Tushare to avoid accidental local Postgres use.
 - Do not ask users to clone any local repo.
 - Do not ask users to provide CLI flags directly; translate natural language into commands.
 

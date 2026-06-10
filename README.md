@@ -49,11 +49,13 @@ Expected asset names:
 
 - Runtime configuration is provided at runtime.
 - The public CLI is valuation-only and can read from a user-configured database or Tushare.
+- Explicit `DATA_SOURCE` decides the runtime source. If it is unset and both
+  database env and `TUSHARE_TOKEN` are present, skill wrappers prefer Tushare.
 - The packaged valuation engine is not embedded in the skill files themselves; it is distributed via GitHub Releases.
 
-## Database Setup (OpenClaw)
+## Runtime Setup (OpenClaw)
 
-Recommended setup:
+Database setup:
 
 ```bash
 openclaw config set skills.entries.wenwengu-cli.primaryEnv "DATABASE_URL"
